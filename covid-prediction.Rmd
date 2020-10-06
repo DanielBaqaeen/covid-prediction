@@ -251,25 +251,26 @@ table(knn.pred, test3[,7])
 
 ```{r}
 
-# index4=sample(1:nrow(train3), round(nrow(train3)*0.9))
-# train4=train3[index4, ]
-# test4=train3[-index4, ]
-# 
-# 
-# index5=sample(1:nrow(test4), round(nrow(test4)*0.7))
-# train5=test4[index5, ]
-# test5=test4[-index5, ]
-# 
-# knn.pred = knn(train5[,-7], test5[,-7] ,train5[,7],k=12, use.all = FALSE)
-# table(knn.pred, test5[,7])
-# 
-# 
-# library(class)
-# knn.data = rep(0,450)
-# 
-# for(i in 1:450){
-# knn.pred=knn(train5[,-7], test5[,-7] ,train5[,7],k=i)
-# knn.data[i] = mean(knn.pred==test5[,7])
-# }
-# which.max(knn.data)
+index4=sample(1:nrow(train3), round(nrow(train3)*0.9))
+train4=train3[index4, ]
+test4=train3[-index4, ]
+
+
+index5=sample(1:nrow(test4), round(nrow(test4)*0.7))
+train5=test4[index5, ]
+test5=test4[-index5, ]
+
+library(class)
+knn.data = rep(0,450)
+
+for(i in 1:450){
+knn.pred=knn(train5[,-7], test5[,-7] ,train5[,7],k=i)
+knn.data[i] = mean(knn.pred==test5[,7])
+}
+
+optimal.k.1 = which.max(knn.data)
+optimal.k.1
+
+knn.pred = knn(train5[,-7], test5[,-7] ,train5[,7],k=optimal.k.1, use.all = FALSE)
+table(knn.pred, test5[,7])
 ```
