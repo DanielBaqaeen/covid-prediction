@@ -82,6 +82,8 @@ for(i in 1: 192365)
   }
 }
 
+# Classified the race and ethnicity predictors into 6 unique classes
+
 for(i in 1: 192365)
 {
   if(newdata$Race.and.ethnicity..combined.[i] =="American Indian/Alaska Native, Non-Hispanic"){
@@ -135,36 +137,55 @@ for(i in 1: 192365)
 
 ```{r}
 library(glmnet)
+# Linear regression model predicting death_yn (dead or not) using all other variables. This model used the whole data set 
 lr = glm(death_yn ~ ., family = "binomial", data=newdata)
 summary(lr)
 
+# Split the data into training and test data (70% was training and 30% was test)
 index=sample(1:nrow(newdata), round(nrow(newdata)*0.7))
 train=newdata[index, ]
 test=newdata[-index, ]
 
+# Linear regression model predicting death_yn (dead or not) using all other variables. This model used just the training set
 lr.all = glm(death_yn ~ ., family = "binomial", data=train)
 summary(lr.all)
 
+# Correlation plot for all the data except age group and race and ethnicity predictors because they are not numeric
 cor(train[, -c(3,4)])
+
+# Linear regression model predicting death_yn (dead or not) using icu_yn (was in the icu or not) as an predictor. This model used just the training set
 
 lr2 = glm(death_yn ~ icu_yn , family = "binomial", data=train)
 summary(lr2)
 
+# Linear regression model predicting death_yn (dead or not) using hosp_yn (was in the hospital or not) as an predictor. This model used just the training set
+
 lr3 = glm(death_yn ~ hosp_yn , family = "binomial", data=train)
 summary(lr3)
+
+
+# Linear regression model predicting death_yn (dead or not) using age_group as an predictor. This model used just the training set
 
 lr4 = glm(death_yn ~ age_group , family = "binomial", data=train)
 summary(lr4)
 
+
+# Linear regression model predicting death_yn (dead or not) using  age_group, sex, icu_yn,  hosp_yn, and medcond_yn (if they had a medical condition before or not) as predictors. This model used just the training set
+
 lr5 = glm(death_yn ~ age_group + sex + icu_yn + hosp_yn + medcond_yn  , family = "binomial", data=train)
 summary(lr5)
+
+# Linear regression model predicting death_yn (dead or not) using  medcond_yn as the predictor. This model used just the training set
 
 lr6 = glm(death_yn ~  medcond_yn  , family = "binomial", data=train)
 summary(lr6)
 
+# Linear regression model predicting death_yn (dead or not) using  Race.and.ethnicity..combined as the predictor. This model used just the training set
+
 lr7 = glm(death_yn ~ Race.and.ethnicity..combined.  , family = "binomial", data=train)
 summary(lr7)
 
+#Confusion matrix for each of the linear regression models
 
 glm.probs=predict(lr, test,type="response")
 glm.pred=rep(0, 192365)
@@ -216,15 +237,21 @@ In general, predicted not-dead (death_yn = 0) correctly significantly better tha
 ```{r}
 set.seed(1)
 
+# Splitting the original test data into a smaller subset (91% of the test data)
+
 index2=sample(1:nrow(test), round(nrow(test)*0.91))
 train2=test[index2, ]
 test2=test[-index2, ]
+
+# Splitting the smaller subset into training and subsets (70% training and 30% test) 
 
 index3=sample(1:nrow(train2), round(nrow(train2)*0.7))
 train3=train2[index3, ]
 test3=train2[-index3, ]
 
 library(class)
+
+# Finding the optimal K-value, 10 was the highest K-value that didn't give an error (too many tie in KNN, the value was found by trail and error) 
 
 knn.data = rep(0,10)
 for(i in 1:10){
@@ -235,17 +262,15 @@ knn.data[i] = mean(knn.pred==test3[,7])
 optimal.k = which.max(knn.data)
 optimal.k
 
-knn.pred = knn(train3[,-c(7, 1:5, 8)], test3[,-c(7, 1:5, 8)] ,train3[,7],k=1, use.all = FALSE)
+#using the optimal K-value to predict death_yn (dead or not) using all other variables. Using the smaller subset of the test data
 knn.pred = knn(train3[,-7], test3[,-7] ,train3[,7],k=optimal.k, use.all = FALSE)
 table(knn.pred, test3[,7])
 
-
 ```
-91.5%
 
-91.4%
 
 ```{r}
+# Splitting the data into increasingly smaller subsets and testing which K-value is the most optimal, This didn't affect our final KNN we decided to choose.This was an experiment to see the pattern when a larger range of K-values is used.) 
 
 index4=sample(1:nrow(train3), round(nrow(train3)*0.9))
 train4=train3[index4, ]
