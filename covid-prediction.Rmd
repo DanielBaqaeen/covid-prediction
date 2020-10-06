@@ -1,0 +1,230 @@
+---
+title: "Project1"
+---
+
+```{r setup}
+data=read.csv('COVID-19_project1.csv',header=TRUE)
+newdata = data[, -c(1:3)]
+newdata$sex <- ifelse(newdata[,2]=="Female", 1, 0)
+newdata$hosp_yn <- ifelse(newdata[,5]=="Yes", 1, 0)
+newdata$icu_yn <- ifelse(newdata[,6]=="Yes", 1, 0)
+newdata$death_yn <- ifelse(newdata[,7]=="Yes", 1, 0)
+newdata$medcond_yn <- ifelse(newdata[,8]=="Yes", 1, 0)
+newdata$current_status <- ifelse(newdata[,1]=="Laboratory-confirmed case", 1, 0)
+
+newdata <- newdata[!newdata$age_group =="Unknown",]
+newdata <- newdata[!newdata$Race.and.ethnicity..combined. =="Unknown",]
+
+
+for(i in 1: 192365)
+{
+  if(newdata$age_group[i] =="0 - 9 Years"){
+    newdata$age_group[i] = 1
+  }
+}
+
+for(i in 1: 192365)
+{
+  if(newdata$age_group[i] =="10 - 19 Years"){
+    newdata$age_group[i] = 2
+  }
+}
+
+for(i in 1: 192365)
+{
+  if(newdata$age_group[i] =="20 - 29 Years"){
+    newdata$age_group[i] = 3
+  }
+}
+
+for(i in 1: 192365)
+{
+  if(newdata$age_group[i] =="30 - 39 Years"){
+    newdata$age_group[i] = 4
+  }
+}
+
+for(i in 1: 192365)
+{
+  if(newdata$age_group[i] =="40 - 49 Years"){
+    newdata$age_group[i] = 5
+  }
+}
+
+for(i in 1: 192365)
+{
+  if(newdata$age_group[i] =="50 - 59 Years"){
+    newdata$age_group[i] = 6
+  }
+}
+
+for(i in 1: 192365)
+{
+  if(newdata$age_group[i] =="60 - 69 Years"){
+    newdata$age_group[i] = 7
+  }
+}
+
+for(i in 1: 192365)
+{
+  if(newdata$age_group[i] =="70 - 79 Years"){
+    newdata$age_group[i] = 8
+  }
+}
+
+for(i in 1: 192365)
+{
+  if(newdata$age_group[i] =="80+ Years"){
+    newdata$age_group[i] = 9
+  }
+}
+
+for(i in 1: 192365)
+{
+  if(newdata$Race.and.ethnicity..combined.[i] =="American Indian/Alaska Native, Non-Hispanic"){
+    newdata$Race.and.ethnicity..combined.[i] = 1
+  }
+}
+
+for(i in 1: 192365)
+{
+  if(newdata$Race.and.ethnicity..combined.[i] =="Asian, Non-Hispanic"){
+    newdata$Race.and.ethnicity..combined.[i] = 2
+  }
+}
+
+for(i in 1: 192365)
+{
+  if(newdata$Race.and.ethnicity..combined.[i] =="Black, Non-Hispanic"){
+    newdata$Race.and.ethnicity..combined.[i] = 3
+  }
+}
+
+for(i in 1: 192365)
+{
+  if(newdata$Race.and.ethnicity..combined.[i] =="Hispanic/Latino"){
+    newdata$Race.and.ethnicity..combined.[i] = 4
+  }
+}
+
+for(i in 1: 192365)
+{
+  if(newdata$Race.and.ethnicity..combined.[i] =="Multiple/Other, Non-Hispanic"){
+    newdata$Race.and.ethnicity..combined.[i] = 5
+  }
+}
+
+for(i in 1: 192365)
+{
+  if(newdata$Race.and.ethnicity..combined.[i] =="Native Hawaiian/Other Pacific Islander, Non-Hispanic"){
+    newdata$Race.and.ethnicity..combined.[i] = 6
+  }
+}
+
+for(i in 1: 192365)
+{
+  if(newdata$Race.and.ethnicity..combined.[i] =="White, Non-Hispanic"){
+    newdata$Race.and.ethnicity..combined.[i] = 7
+  }
+}
+
+```
+
+```{r}
+library(glmnet)
+lr = glm(death_yn ~ ., family = "binomial", data=newdata)
+summary(lr)
+
+index=sample(1:nrow(newdata), round(nrow(newdata)*0.7))
+train=newdata[index, ]
+test=newdata[-index, ]
+
+lr.all = glm(death_yn ~ ., family = "binomial", data=train)
+summary(lr.all)
+
+cor(train[, -c(3,4)])
+
+lr2 = glm(death_yn ~ icu_yn , family = "binomial", data=train)
+summary(lr2)
+
+lr3 = glm(death_yn ~ hosp_yn , family = "binomial", data=train)
+summary(lr3)
+
+lr4 = glm(death_yn ~ age_group , family = "binomial", data=train)
+summary(lr4)
+
+lr5 = glm(death_yn ~ age_group + sex + icu_yn + hosp_yn + medcond_yn  , family = "binomial", data=train)
+summary(lr5)
+
+lr6 = glm(death_yn ~  medcond_yn  , family = "binomial", data=train)
+summary(lr6)
+
+lr7 = glm(death_yn ~ Race.and.ethnicity..combined.  , family = "binomial", data=train)
+summary(lr7)
+
+
+glm.probs=predict(lr, test,type="response")
+glm.pred=rep(0, 192365)
+glm.pred[glm.probs>.5]= 1
+table(glm.pred,newdata[,7])
+
+glm.probs2=predict(lr.all, test,type="response")
+glm.pred2=rep(0, 57709)
+glm.pred2[glm.probs>.5]= 1
+table(glm.pred2,test[,7])
+
+glm.probs3=predict(lr2, test,type="response")
+glm.pred3=rep(0, 57709)
+glm.pred3[glm.probs3>.5]= 1
+table(glm.pred3,test[,7])
+
+glm.probs4=predict(lr3, test,type="response")
+glm.pred4=rep(0, 57709)
+glm.pred4[glm.probs4>.5]= 1
+table(glm.pred4,test[,7])
+
+glm.probs5=predict(lr4, test,type="response")
+glm.pred5=rep(0, 57709)
+glm.pred5[glm.probs5>.5]= 1
+table(glm.pred5,test[,7])
+
+glm.probs6=predict(lr5, test,type="response")
+glm.pred6=rep(0, 57709)
+glm.pred6[glm.probs5>.5]= 1
+table(glm.pred6,test[,7])
+
+glm.probs7=predict(lr6, test,type="response")
+glm.pred7=rep(0, 57709)
+glm.pred7[glm.probs5>.5]= 1
+table(glm.pred7,test[,7])
+
+glm.probs8=predict(lr7, test,type="response")
+glm.pred8=rep(0, 57709)
+glm.pred8[glm.probs5>.5]= 1
+table(glm.pred8,test[,7])
+
+
+```
+
+
+In general, predicted not-dead (death_yn = 0) correctly significantly better than if dead (death_yn = 1)
+
+
+```{r}
+library(class)
+knn.pred = knn(train[,-6], test[,-6] ,train[,6],k=1, use.all = FALSE)
+table(knn.pred, test[,6])
+
+```
+
+
+```{r}
+library(class)....
+knn.data = rep(0,2364)
+
+for(i in 1:2364){
+knn.pred=knn(train[,-6], test[,-6] ,train[,6],k=i)
+knn.data[i] = mean(knn.pred==test[,6])
+}
+which.max(knn.data)
+```
