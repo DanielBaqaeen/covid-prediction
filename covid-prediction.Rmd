@@ -227,7 +227,7 @@ set.seed(1)
 
 # Splitting the original test data into a smaller subset (91% of the test data)
 
-index2=sample(1:nrow(test), round(nrow(test)*0.91))
+index2=sample(1:nrow(test), round(nrow(test)*0.89))
 train2=test[index2, ]
 test2=test[-index2, ]
 
