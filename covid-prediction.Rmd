@@ -18,6 +18,7 @@ newdata <- newdata[!newdata$age_group =="Unknown",]
 newdata <- newdata[!newdata$Race.and.ethnicity..combined. =="Unknown",]
 
 # Classified the age group predictors into 9 unique classes
+# Using a for loop for each group individually had a quicker run time than having it in one for loop and multiple ifelse statements
 
 for(i in 1: 192365)
 {
@@ -169,7 +170,6 @@ summary(lr3)
 lr4 = glm(death_yn ~ age_group , family = "binomial", data=train)
 summary(lr4)
 
-
 # Linear regression model predicting death_yn (dead or not) using  age_group, sex, icu_yn,  hosp_yn, and medcond_yn (if they had a medical condition before or not) as predictors. This model used just the training set
 
 lr5 = glm(death_yn ~ age_group + sex + icu_yn + hosp_yn + medcond_yn  , family = "binomial", data=train)
@@ -185,6 +185,7 @@ summary(lr6)
 lr7 = glm(death_yn ~ Race.and.ethnicity..combined.  , family = "binomial", data=train)
 summary(lr7)
 
+
 #Confusion matrix for each of the linear regression models
 
 glm.probs=predict(lr, test,type="response")
@@ -194,7 +195,7 @@ table(glm.pred,newdata[,7])
 
 glm.probs2=predict(lr.all, test,type="response")
 glm.pred2=rep(0, 57709)
-glm.pred2[glm.probs>.5]= 1
+glm.pred2[glm.probs2>.5]= 1
 table(glm.pred2,test[,7])
 
 glm.probs3=predict(lr2, test,type="response")
@@ -214,24 +215,21 @@ table(glm.pred5,test[,7])
 
 glm.probs6=predict(lr5, test,type="response")
 glm.pred6=rep(0, 57709)
-glm.pred6[glm.probs5>.5]= 1
+glm.pred6[glm.probs6>.5]= 1
 table(glm.pred6,test[,7])
 
 glm.probs7=predict(lr6, test,type="response")
 glm.pred7=rep(0, 57709)
-glm.pred7[glm.probs5>.5]= 1
+glm.pred7[glm.probs7>.5]= 1
 table(glm.pred7,test[,7])
 
 glm.probs8=predict(lr7, test,type="response")
 glm.pred8=rep(0, 57709)
-glm.pred8[glm.probs5>.5]= 1
+glm.pred8[glm.probs8>.5]= 1
 table(glm.pred8,test[,7])
-
 
 ```
 
-
-In general, predicted not-dead (death_yn = 0) correctly significantly better than if dead (death_yn = 1)
 
 
 ```{r}
