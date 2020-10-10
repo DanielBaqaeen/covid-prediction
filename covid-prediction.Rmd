@@ -170,11 +170,6 @@ summary(lr3)
 lr4 = glm(death_yn ~ age_group , family = "binomial", data=train)
 summary(lr4)
 
-# Linear regression model predicting death_yn (dead or not) using  age_group, sex, icu_yn,  hosp_yn, and medcond_yn (if they had a medical condition before or not) as predictors. This model used just the training set
-
-lr5 = glm(death_yn ~ age_group + sex + icu_yn + hosp_yn + medcond_yn  , family = "binomial", data=train)
-summary(lr5)
-
 # Linear regression model predicting death_yn (dead or not) using  medcond_yn as the predictor. This model used just the training set
 
 lr6 = glm(death_yn ~  medcond_yn  , family = "binomial", data=train)
@@ -212,11 +207,6 @@ glm.probs5=predict(lr4, test,type="response")
 glm.pred5=rep(0, 57709)
 glm.pred5[glm.probs5>.5]= 1
 table(glm.pred5,test[,7])
-
-glm.probs6=predict(lr5, test,type="response")
-glm.pred6=rep(0, 57709)
-glm.pred6[glm.probs6>.5]= 1
-table(glm.pred6,test[,7])
 
 glm.probs7=predict(lr6, test,type="response")
 glm.pred7=rep(0, 57709)
